@@ -40,3 +40,17 @@ These checks cover grid tiling, piece orientations, collisions, solvability, arr
 - `dist/game.js`: rendering, camera, interaction, and race state.
 - `dist/index.html` and `dist/voxel.css`: interface and styling.
 - `.openai/hosting.json`: configuration for the existing Sites deployment.
+
+## Android APK
+
+The `android/` project packages the same `dist/` files as an offline Android app (Android 8.0 or later). It uses the system Android WebView, stores personal records locally, and requests no Internet permission.
+
+With JDK 17, Android SDK platform 35, and Gradle 8.11.1 installed:
+
+```sh
+gradle -p android :app:assembleDebug
+```
+
+The installable debug-signed APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for direct installation and testing; a store release needs a separate release signing key.
+
+The **Build Android APK** GitHub Actions workflow builds the APK, checks its signature, runs the puzzle verification scripts, and exercises the offline game on an Android 35 emulator. Download the `ArrowDrift-Android-APK` artifact from a successful workflow run.
