@@ -62,6 +62,7 @@ jobs:
             adb shell svc wifi disable
             adb shell svc data disable
             gradle -p android :app:connectedDebugAndroidTest --stacktrace
+            adb install -r apk/ArrowDrift-debug.apk
             adb shell am start -n com.mile22t.arrowdrift/.MainActivity
             sleep 3
             adb exec-out screencap -p > android-smoke.png
@@ -73,4 +74,5 @@ jobs:
           path: |
             android/app/build/reports/
             android-smoke.png
+
 
