@@ -49,6 +49,7 @@ public class GameSmokeTest {
         var instrumentation = InstrumentationRegistry.getInstrumentation();
         Intent intent = new Intent(instrumentation.getTargetContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        System.out.println("ArrowDrift test: launching activity");
         MainActivity activity = (MainActivity) instrumentation.startActivitySync(intent);
         WebView webView = activity.getGameWebView();
         long deadline = System.currentTimeMillis() + 30000;
@@ -58,6 +59,7 @@ public class GameSmokeTest {
             if ("true".equals(ready)) break;
             Thread.sleep(250);
         }
+        System.out.println("ArrowDrift test: page ready=" + ready);
         assertEquals("Bundled game must initialize offline", "true", ready);
         assertEquals("\"Hard time trial\"", js(webView, "document.getElementById('level').textContent"));
         assertEquals("true", js(webView, "document.querySelector('aside')===null && document.querySelector('footer')===null"));
@@ -69,6 +71,7 @@ public class GameSmokeTest {
         float cx = location[0] + (float) bounds.getDouble(0) * factor;
         float cy = location[1] + (float) bounds.getDouble(1) * factor;
         String piecesBeforeGesture = js(webView, "blocks.length");
+        System.out.println("ArrowDrift test: injecting two-finger gesture");
         long downTime = SystemClock.uptimeMillis();
         touch(downTime, MotionEvent.ACTION_DOWN, new float[][]{{cx-60,cy}});
         touch(downTime, MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT), new float[][]{{cx-60,cy},{cx+60,cy}});
@@ -76,6 +79,7 @@ public class GameSmokeTest {
         touch(downTime, MotionEvent.ACTION_POINTER_UP | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT), new float[][]{{cx-100,cy},{cx+100,cy}});
         touch(downTime, MotionEvent.ACTION_UP, new float[][]{{cx-100,cy}});
         Thread.sleep(300);
+        System.out.println("ArrowDrift test: gesture completed zoom=" + js(webView, "zoom"));
         assertTrue("Real two-finger input must zoom the puzzle", Double.parseDouble(js(webView, "zoom")) > 1.4);
         assertEquals("Pinching must not release a piece", piecesBeforeGesture, js(webView, "blocks.length"));
         js(webView, "document.getElementById('home').click()");
