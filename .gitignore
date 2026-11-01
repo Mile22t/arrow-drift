@@ -5,3 +5,7 @@ android/**/build/
 *.aab
 *.jks
 *.keystore
+
+*.p12
+*.pem
+*.pk8

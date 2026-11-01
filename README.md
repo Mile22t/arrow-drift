@@ -54,3 +54,11 @@ gradle -p android :app:assembleDebug
 The installable debug-signed APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. Debug signing is for direct installation and testing; a store release needs a separate release signing key.
 
 The **Build Android APK** GitHub Actions workflow builds the APK, checks its signature, runs the puzzle verification scripts, and exercises the offline game on an Android 35 emulator. Download the `ArrowDrift-Android-APK` artifact from a successful workflow run.
+
+## Touch controls and signed Android updates
+
+Drag with one finger to rotate. Pinch with two fingers to zoom, or move both fingers together to pan. The game screen contains only the puzzle and play controls.
+
+Version 1.1.0 uses a persistent release signing key stored in encrypted GitHub Actions secrets (ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD). The repository contains no private key. CI builds and tests the release variant, including real two-finger input in the Android emulator. Future builds signed with this key can update each other. The earlier 1.0.0 debug build used an ephemeral key and must be uninstalled once before installing 1.1.0; uninstalling clears local records.
+
+The release artifact is ArrowDrift.apk. To build a signed release locally, set ANDROID_KEYSTORE_FILE and ANDROID_KEYSTORE_PASSWORD, then run gradle -p android :app:assembleRelease.

@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -23,6 +25,14 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
+      - name: Restore persistent signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/arrow-drift.p12"
+          chmod 600 "$RUNNER_TEMP/arrow-drift.p12"
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/arrow-drift.p12" >> "$GITHUB_ENV"
       - name: Install build platform
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - name: Verify puzzle rules
@@ -30,16 +40,17 @@ jobs:
           node verify.cjs
           node verify-runs.cjs
           node verify-race.cjs
+          node verify-touch.cjs
       - name: Build and lint APK
         working-directory: android
-        run: gradle :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --stacktrace
+        run: gradle :app:assembleRelease :app:assembleReleaseAndroidTest :app:lintRelease --stacktrace
       - name: Verify APK signature and package
         run: |
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging android/app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging android/app/build/outputs/apk/release/app-release.apk
           mkdir -p apk
-          cp android/app/build/outputs/apk/debug/app-debug.apk apk/ArrowDrift-debug.apk
-          sha256sum apk/ArrowDrift-debug.apk > apk/SHA256SUMS.txt
+          cp android/app/build/outputs/apk/release/app-release.apk apk/ArrowDrift.apk
+          sha256sum apk/ArrowDrift.apk > apk/SHA256SUMS.txt
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
@@ -61,8 +72,9 @@ jobs:
           script: |
             adb shell svc wifi disable
             adb shell svc data disable
-            gradle -p android :app:connectedDebugAndroidTest --stacktrace
-            adb install -r apk/ArrowDrift-debug.apk
+            gradle -p android :app:connectedReleaseAndroidTest --stacktrace
+            adb install -r apk/ArrowDrift.apk
+            adb shell am force-stop com.google.android.apps.nexuslauncher || true
             adb shell am start -n com.mile22t.arrowdrift/.MainActivity
             sleep 3
             adb exec-out screencap -p > android-smoke.png
