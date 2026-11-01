@@ -63,6 +63,13 @@ public class GameSmokeTest {
         assertEquals("Bundled game must initialize offline", "true", ready);
         assertEquals("\"Hard time trial\"", js(webView, "document.getElementById('level').textContent"));
         assertEquals("true", js(webView, "document.querySelector('aside')===null && document.querySelector('footer')===null"));
+        String depthCheck;
+        try (var input = instrumentation.getContext().getAssets().open("depth-check.js");
+             var scanner = new java.util.Scanner(input, "UTF-8")) {
+            depthCheck = scanner.useDelimiter("\\A").next();
+        }
+        assertEquals("3D surfaces and arrow markings must obey pixel depth, including at 2x density", "true", js(webView, depthCheck));
+        assertEquals("true", js(webView, "renderer.gl.isEnabled(renderer.gl.DEPTH_TEST)"));
         JSONArray bounds = new JSONArray(js(webView,
             "(()=>{const r=document.getElementById('canvas').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,window.innerWidth]})()"));
         int[] location = new int[2];

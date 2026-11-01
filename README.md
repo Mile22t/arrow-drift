@@ -62,3 +62,7 @@ Drag with one finger to rotate. Pinch with two fingers to zoom, or move both fin
 Version 1.1.0 uses a persistent release signing key stored in encrypted GitHub Actions secrets (ANDROID_KEYSTORE_BASE64 and ANDROID_KEYSTORE_PASSWORD). The repository contains no private key. CI builds and tests the release variant, including real two-finger input in the Android emulator. Future builds signed with this key can update each other. The earlier 1.0.0 debug build used an ephemeral key and must be uninstalled once before installing 1.1.0; uninstalling clears local records.
 
 The release artifact is ArrowDrift.apk. To build a signed release locally, set ANDROID_KEYSTORE_FILE and ANDROID_KEYSTORE_PASSWORD, then run gradle -p android :app:assembleRelease.
+
+## Depth rendering (1.1.1)
+
+The game uses a WebGL depth buffer for every piece face, outline, and arrow marking, replacing face-center painter sorting. This prevents rotated slabs and newly exposed faces from drawing through other pieces. Android regression checks read rendered pixels for overlapping surfaces in both draw orders, hidden arrow markings, and 2× display density, alongside offline gameplay and pinch input.

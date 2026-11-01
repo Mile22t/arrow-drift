@@ -7,8 +7,8 @@ android {
         applicationId 'com.mile22t.arrowdrift'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '1.1.0'
+        versionCode 3
+        versionName '1.1.1'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     signingConfigs {
@@ -34,7 +34,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     buildFeatures { buildConfig = true }
-    sourceSets { main { assets.srcDirs = ['../../dist'] } }
+    sourceSets { main { assets.srcDirs = ['../../dist'] }; androidTest { assets.srcDirs = ['../../android-tests'] } }
 }
 
 dependencies {

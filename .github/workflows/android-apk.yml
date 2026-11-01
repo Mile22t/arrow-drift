@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['android/**', 'dist/**', '.github/workflows/android-apk.yml']
+    paths: ['android/**', 'android-tests/**', 'dist/**', 'verify*.cjs', '.github/workflows/android-apk.yml']
 permissions:
   contents: read
 jobs:
