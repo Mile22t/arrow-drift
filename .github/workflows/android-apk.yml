@@ -57,6 +57,8 @@ jobs:
           name: ArrowDrift-Android-APK
           path: apk/
           if-no-files-found: error
+      - name: Stop build daemon before emulator
+        run: gradle --stop
       - name: Enable emulator acceleration
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -65,15 +67,18 @@ jobs:
       - name: Test offline game in Android emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 34
           target: google_apis
           arch: x86_64
           disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 2048 -feature -Vulkan
           script: |
             adb shell svc wifi disable
             adb shell svc data disable
-            gradle -p android :app:connectedReleaseAndroidTest --stacktrace
             adb install -r apk/ArrowDrift.apk
+            adb install -r "$(find android/app/build/outputs/apk/androidTest/release -name '*.apk' -print -quit)"
+            adb shell am instrument -w -r com.mile22t.arrowdrift.test/androidx.test.runner.AndroidJUnitRunner | tee instrumentation-results.txt
+            grep -q 'OK (1 test)' instrumentation-results.txt
             adb shell am force-stop com.google.android.apps.nexuslauncher || true
             adb shell am start -n com.mile22t.arrowdrift/.MainActivity
             sleep 3
@@ -86,5 +91,6 @@ jobs:
           path: |
             android/app/build/reports/
             android-smoke.png
+            instrumentation-results.txt
 
 
